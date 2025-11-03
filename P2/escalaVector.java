@@ -5,7 +5,7 @@ public class escalaVector{
 
     public static void main(String[] args) {
 
-        int n = 1000000; // tamaño del vector
+        int n = 10000000; // tamaño del vector
         int[] vector = new int[n];
         Random rand = new Random();
         double[] resultado = new double[n];
