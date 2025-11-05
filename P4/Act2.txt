@@ -1,0 +1,34 @@
+2. Haga lo mismo con el método Thread.yield().
+
+El método estático Thread.yield() pertenece a la clase java.lang.Thread y se utiliza para sugerir al planificador de hilos (scheduler) del sistema 
+operativo que el hilo actual está dispuesto a ceder la CPU temporalmente.
+
+En otras palabras:
+El hilo que llama a Thread.yield() indica que no necesita seguir ejecutándose de inmediato, permitiendo que otros hilos de igual prioridad tengan la 
+oportunidad de ejecutarse.
+
+Funcionamiento
+
+Cuando un hilo ejecuta Thread.yield():
+    1-Se mantiene en estado "Runnable" (preparado para ejecutarse), no pasa a "Blocked" ni a "Waiting".
+    2-El planificador de hilos puede decidir pausar su ejecución y dar CPU a otro hilo de la misma prioridad.
+    3-Sin embargo, no hay garantía de que otro hilo realmente tome el control; puede que el mismo hilo continúe ejecutándose si el planificador así lo decide.
+
+🔹 En resumen, Thread.yield() es solo una sugerencia al planificador, no una orden.
+
+public class EjemploYield {
+    public static void main(String[] args) {
+        Runnable tarea = () -> {
+            for (int i = 0; i < 5; i++) {
+                System.out.println(Thread.currentThread().getName() + " - iteración " + i);
+                Thread.yield(); // Cede el procesador voluntariamente
+            }
+        };
+
+        Thread t1 = new Thread(tarea, "Hilo-1");
+        Thread t2 = new Thread(tarea, "Hilo-2");
+
+        t1.start();
+        t2.start();
+    }
+}

@@ -1,0 +1,48 @@
+1. Pida a ChatGPT información sobre el uso y funcionamiento de las variables cualificadas como volatile en Java
+
+En Java, la palabra clave volatile se utiliza para indicar al compilador y a la JVM que una variable puede ser modificada por múltiples hilos simultáneamente.
+Por tanto, sirve para garantizar la visibilidad de los cambios realizados por un hilo a otros hilos.
+
+Funcionamiento
+
+Normalmente, en un programa concurrente:
+Cada hilo puede mantener una copia local (en caché) de las variables para mejorar el rendimiento.
+Si un hilo modifica una variable, otros hilos podrían no ver el valor actualizado inmediatamente, ya que están leyendo su copia local.
+Cuando declaras una variable como volatile, le dices a la JVM:
+No caches esa variable localmente en los hilos.
+Lee y escribe directamente desde la memoria principal.
+Cualquier cambio realizado por un hilo será visible inmediatamente a los demás hilos.
+
+Un ejemplo en codigo sería:
+
+public class EjemploVolatile {
+    private volatile boolean activo = true;
+
+    public void ejecutar() {
+        while (activo) {
+            // Hace algo mientras 'activo' sea true
+        }
+    }
+
+    public void detener() {
+        activo = false;  // Este cambio será visible de inmediato al hilo que ejecuta 'ejecutar'
+    }
+
+    public static void main(String[] args) throws InterruptedException {
+        EjemploVolatile ejemplo = new EjemploVolatile();
+
+        Thread t1 = new Thread(ejemplo::ejecutar);
+        t1.start();
+
+        Thread.sleep(1000);
+        ejemplo.detener();
+    }
+}
+
+Sin volatile, el hilo que ejecuta ejecutar() podría no detectar nunca el cambio de activo = false, ya que puede estar usando una copia local en caché.
+Con volatile, el cambio se propaga inmediatamente.
+
+Importante: volatile no es atómico
+
+Declarar una variable como volatile no garantiza operaciones atómicas.
+Por ejemplo, las operaciones como contador++ no son seguras incluso si contador es volatile, porque implican varios pasos (leer, incrementar, escribir).

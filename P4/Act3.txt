@@ -1,0 +1,4 @@
+3. Abra este URL: https://github.com/motib/concurrent-distributed/tree/main/Java. En ´el, encontrar´a buena parte de las soluciones teóricas
+para la programación concurrente que se proponen en el libro Principles Of Concurrent and Distributed Programming (M. Ben-Ari) programadas en
+Java. Descargue las cuatro etapas del refinamiento sucesivo (incorrectas) para una solución al problema de la exclusi´on mutua con variables comunes
+y esperada ocupada: ficheros First.java, Second.Java, Third.Java y Fourth.java.
