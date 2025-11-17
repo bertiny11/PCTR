@@ -1,0 +1,101 @@
+En el First al ejecutarlo siempre sale Number of processes in critical section: 1
+¿Qué falla aquí?
+
+1️⃣ No hay exclusión mutua real
+
+Este código supone que sólo entra 1 proceso a la vez, pero eso depende de atomicidad, y aquí nada es atómico.
+Mira esta secuencia posible:
+    P comprueba turn == 1 → es cierto
+    Se interrumpe justo antes de hacer inCS++
+    Q cambia turn = 1
+    Q también entra → porque turn == 2 en algún momento y luego turn == 2 cambia mal
+    Ambos llegan a la sección crítica.
+
+Resultado: dos hilos dentro, exclusión mutua violada.
+Esto es precisamente lo que la asignatura suele querer demostrar.
+
+2️⃣ Thread.yield() NO sincroniza
+
+Como te dije antes, yield() es una sugerencia, no un bloqueo.
+
+Puede dejar de ejecutarse… o no.
+
+→ Es impredecible y no garantiza orden de ejecución.
+→ No evita condiciones de carrera.
+→ No sirve para proteger una sección crítica.
+
+3️⃣ inCS++ y inCS-- NO son atómicos
+
+Estas operaciones requieren tres pasos:
+Leer el valor
+Incrementar
+Escribir el valor
+Si entran dos hilos simultáneamente → uno pisa el valor del otro.
+
+4️⃣ Turnos mal gestionados
+
+El algoritmo correcto de Peterson usa dos banderas + turno, no solo un turno.
+Aquí falta:
+flag[i] = true;
+turn = j;
+Esperar mientras flag[j] && turn == j
+Sin esas banderas no hay espera mutua.
+
+¿Por qué falla el Second Attempt?
+El problema es el orden de operaciones:
+
+
+El  Second
+1️⃣ Comprobación de wantq se hace antes de poner wantp = true
+
+Caso:
+
+P ejecuta:
+while (wantq) yield();
+→ En ese momento, wantq == false, así que P NO espera.
+
+Antes de que P ejecute wantp = true, el sistema hace un cambio de contexto.
+
+Q ejecuta:
+while (wantp) yield();
+→ wantp == false (porque P aún no lo puso a true), así que Q TAMPOCO espera.
+
+Q hace wantq = true y entra a la sección crítica.
+
+Cambio de contexto.
+
+P hace wantp = true y también entra.
+
+➡️ Ambos procesos entran en la sección crítica simultáneamente.
+
+El third:
+¿Dónde falla el Third Attempt? (Interbloqueo)
+
+El error es que si ambos procesos activan su bandera casi al mismo tiempo, pasa esto:
+P ejecuta: wantp = true;
+Cambio de contexto
+Q ejecuta: wantq = true;
+Ahora:
+P bloqueado en while (wantq)
+Q bloqueado en while (wantp)
+➡️ Ambos esperan eternamente
+➡️ Interbloqueo (deadlock)
+➡️ Nadie entra en la sección crítica
+
+El fourth:
+❗ Falla la exclusión mutua → dos procesos pueden entrar a la vez
+¿Cómo?
+Si ambos ejecutan esto a la vez:
+
+P pone wantp = false
+
+Q pone wantq = false
+
+Entonces:
+
+➡️ Cada uno mira la bandera del otro
+➡️ Ambas son false
+➡️ Ambos salen del bucle
+➡️ Ambos entran en la sección crítica al mismo tiempo
+
+💥 Violación de exclusión mutua
